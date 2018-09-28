@@ -1,6 +1,6 @@
--- P.S.: corners collisions not implemented yet.
-
--- Checking AABB collisions
+--
+-- Update: Corners collisions implemented
+--
 
 local function checkAABB(hitbox, tile)
 	return hitbox.x < tile.x + tile.s and
@@ -9,7 +9,7 @@ local function checkAABB(hitbox, tile)
 		   tile.y < hitbox.y + hitbox.h
 end
 
--- Finding the bottom-left and top-right coordinates of the overlap rectangle between the hitbox and the tile,
+-- Finds the bottom-left and top-right coordinates of the overlap rectangle between the hitbox and the tile,
 -- and returning the square pixels of it
 
 local max, min = math.max, math.min
@@ -42,12 +42,37 @@ local function createGhostHitboxes(player)
 	return ghostHitbox
 end
 
--- 
+--
+
+local function solveTopCollision(tileY, tileS)
+	local solvedY = tileY + tileS
+	return solvedY
+end
+
+local function solveBottomCollision(tileY, playerH)
+	local solvedY = tileY - playerH
+	return solvedY
+end
+
+local function solveLeftCollision(tileX, tileS)
+	local solvedX = tileX + tileS
+	return solvedX
+end
+
+local function solveRightCollision(tileX, playerW)
+	local solvedX = tileX - playerW
+	return solvedX
+end
+
+-- All collisions are detected here
 
 local function solveCollision(player, tile)
 	local solvedX, solvedY = player.x, player.y
 	local is_colliding = checkAABB(player, tile)
-	local collision = {top=false, bottom=false, left=false, right=false}
+	local collision = {
+		top=false, bottom=false, left=false, right=false,
+		topLeft=false, topRight=false, bottomLeft=false, bottomRight=false
+	}
 	
 	if is_colliding then
 		local ghostHitbox = createGhostHitboxes(player)
@@ -58,19 +83,46 @@ local function solveCollision(player, tile)
 		
 		if topOverlap > leftOverlap and topOverlap > rightOverlap then
 			collision.top = true
-			solvedY = tile.y + tile.s
+			solvedY = solveTopCollision(tile.y, tile.s)
 		end
+		
 		if bottomOverlap > leftOverlap and bottomOverlap > rightOverlap then
 			collision.bottom = true
-			solvedY = tile.y - player.h
+			solvedY = solveBottomCollision(tile.y, player.h)
 		end
+		
 		if leftOverlap > topOverlap and leftOverlap > bottomOverlap then
 			collision.left = true
-			solvedX = tile.x + tile.s
+			solvedX = solveLeftCollision(tile.x, tile.s)
 		end
+		
 		if rightOverlap > topOverlap and rightOverlap > bottomOverlap then
 			collision.right = true
-			solvedX = tile.x - player.w
+			solvedX = solveRightCollision(tile.x, player.w)
+		end
+		
+		if topOverlap == leftOverlap and topOverlap ~= 0 and leftOverlap ~= 0  then
+			-- Top-left corner collision: resolves like a top collision
+			collision.topLeft = true
+			solvedY = solveTopCollision(tile.y, tile.s)
+		end
+		
+		if topOverlap == rightOverlap and topOverlap ~= 0 and rightOverlap ~= 0 then
+			-- Top-right corner collision: resolves like a top collision
+			collision.topRight = true
+			solvedY = solveTopCollision(tile.y, tile.s)
+		end
+		
+		if bottomOverlap == leftOverlap and bottomOverlap ~= 0 and leftOverlap ~= 0 then
+			-- Bottom-left corner collision: resolves like a bottom collision
+			collision.bottomLeft = true
+			solvedY = solveBottomCollision(tile.y, player.h)
+		end
+		
+		if bottomOverlap == rightOverlap and bottomOverlap ~= 0 and rightOverlap ~= 0 then
+			-- Bottom-right corner collision: resolves like a bottom collision
+			collision.bottomRight = true
+			solvedY = solveBottomCollision(tile.y, player.h)
 		end
 	end
 	
@@ -106,8 +158,7 @@ end
 
 function PlayerHitbox:solveCollision(tile)
 	local collision = {}
-	local playerAttributes = {x=self.x, y=self.y, w=self.w, h=self.h}
-	self.x, self.y, collision = solveCollision(playerAttributes, tile)
+	self.x, self.y, collision = solveCollision(self, tile)
 	return collision
 end
 
