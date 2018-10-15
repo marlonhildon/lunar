@@ -8,19 +8,18 @@ A **Lua** library for **AABB** collisions resolutions (alpha version).
 local lunar = require 'lunar'
 
 function love.load()
-	player = lunar.hitbox:new(0, 0, 32, 64)	--x, y, width, height
-	tile = lunar.tile:new(150, 150, 32)	--x, y, tile size
+	player = lunar.hitbox:new(0, 0, 32, 64) --x, y, width, height
+	tile = lunar.tile:new(150, 150, 32)     --x, y, tile size
 	speed = 0
 end
 
 function love.update(dt)
 	speed = 150 * dt
-	if love.keyboard.isDown("up") 	 then player.y = player.y - speed end
-	if love.keyboard.isDown("down")  then player.y = player.y + speed end
-	if love.keyboard.isDown("left")  then player.x = player.x - speed end
-	if love.keyboard.isDown("right") then player.x = player.x + speed end
-    --Solving all collisions between 'player' and 'tile'
-	player:solveCollision(tile)
+	if love.keyboard.isDown("up")	then player.y = player.y - speed end
+	if love.keyboard.isDown("down")	then player.y = player.y + speed end
+	if love.keyboard.isDown("left")	then player.x = player.x - speed end
+	if love.keyboard.isDown("right")then player.x = player.x + speed end
+	player:solveCollision(tile) --Solving all collisions between 'player' and 'tile'
 end
 
 function love.draw()
@@ -28,111 +27,116 @@ function love.draw()
 	love.graphics.rectangle('line', tile.x, tile.y, tile.s, tile.s)
 end
 ```
+## Installing
+Just download and `require` the `lunar.lua` script:
+```lua
+local lunar = require 'lunar'
+```
 
-## Classes
+## How to use
 
-### Hitbox
-* **`lunar.hitbox:new(x, y, width, height)`**
+### 1. Create a hitbox
+**`lunar.hitbox:new(x, y, width, height)`**
 
-**Arguments**
-* `x: number`
-* `y: number`
-* `width: number`
-* `height: number`
+`x: number`<br/>
+`y: number`<br/>
+`width: number`<br/>
+`height: number`<br/>
 
-**Returns**
-* `hitbox: instance`
+**Returns**<br/>
+`hitbox: instance`
 
-**Instance attributes**
-* `hitbox.x: number`
-* `hitbox.y: number`
-* `hitbox.width: number`
-* `hitbox.height: number`
+**Instance attributes**<br/>
+`hitbox.x: number`<br/>
+`hitbox.y: number`<br/>
+`hitbox.width: number`<br/>
+`hitbox.height: number`
 
-Instantiates a **hitbox**. Use it for bodies who need **collision resolution**.
+>**Note**: Use it only for bodies who need **collision resolution**.
 
 **Example (using LÖVE):**
 ```lua
 local lunar = require 'lunar'
 
 function love.load()
-	player = lunar.hitbox:new(0, 12, 32, 64)	--x, y, width, height
-end
-
-function love.draw()
-	love.graphics.print("Player x: "..player.x.."\nPlayer y: "..player.y)
-	love.graphics.print("\n\nPlayer width: "..player.w.."\nPlayer height: "..player.h)
+	player = lunar.hitbox:new(0, 12, 32, 64) --x, y, width, height
 end
 ```
 
-#### Methods
-* **`hitbox:solveCollisions(tile)`**
+### 2. Create a Tile
+**`lunar.tile:new(x, y, size)`**
 
-**Arguments**
-* `tile: instance`
+`x: number`<br/>
+`y: number`<br/>
+`size: number`<br/>
 
-**Returns**
-* `collisions: table`
+**Returns:**<br/>
+`tile: instance`
 
-**Collisions entries:**
-* `collisions.top: boolean`
-* `collisions.bottom: boolean`
-* `collisions.left: boolean`
-* `collisions.right boolean`
-* `collisions.topLeft: boolean`
-* `collisions.topRight: boolean`
-* `collisions.bottomLeft: boolean`
-* `collisions.bottomRight: boolean`
+**Instance attributes:**<br/>
+`tile.x: number`<br/>
+`tile.y: number`<br/>
+`tile.s: number`
 
-**Solves all collisions** between ``hitbox`` and ``tile``.
-
-A collision entry will be ``true`` when a **collision** between ``hitbox`` and ``tile`` occur. When it **resolutes**, it will be ``false``.
-
->**Note:** **top-left** and **top-right** collisions are treated like **top collisions** by default. **Bottom-left** and **bottom-right** collisions are processed like **bottom collisions**.
-
-###Tile
-* **`lunar.tile:new(x, y, size)`**
-
-**Arguments:**
-* `x: number`
-* `y: number`
-* `size: number`
-
-**Returns:**
-* `tile: instance`
-
-**Instance attributes:**
-* `tile.x: number`
-* `tile.y: number`
-* `tile.s: number`
-
-Instantiates a **tile**. Use it for scenario things and as argument in `hitbox:solveCollision(tile)`.
+>**Note**: Use it for scenario and other things.
 
 **Example (using LÖVE):**
 ```lua
 local lunar = require 'lunar'
 
 function love.load()
-	player = lunar.hitbox:new(0, 0, 32, 64)	--x, y, width, height
-	tile = lunar.tile:new(150, 150, 32)	--x, y, tile size
+	player = lunar.hitbox:new(0, 0, 32, 64)
+	tile = lunar.tile:new(150, 150, 32) --x, y, tile size
+end
+```
+
+### 3. Solve collisions
+**`hitbox:solveCollisions(tile)`**
+
+`tile: instance`
+
+**Returns**<br/>
+`collisions: table`
+
+**Table entries:**<br/>
+`collisions.top: boolean`<br/>
+`collisions.bottom: boolean`<br/>
+`collisions.left: boolean`<br/>
+`collisions.right boolean`<br/>
+`collisions.topLeft: boolean`<br/>
+`collisions.topRight: boolean`<br/>
+`collisions.bottomLeft: boolean`<br/>
+`collisions.bottomRight: boolean`
+
+A collision entry will be ``true`` when a **collision** between ``hitbox`` and ``tile`` is detected. When it **resolutes**, it will be ``false``.
+
+>**Note:** **top-left** and **top-right** collisions are treated like **top collisions** by default. **Bottom-left** and **bottom-right** collisions are processed like **bottom collisions**.
+
+**Example (using LÖVE):**
+```lua
+local lunar = require 'lunar'
+
+function love.load()
+	player = lunar.hitbox:new(0, 0, 32, 64)
+	tile = lunar.tile:new(150, 150, 32)
 	speed = 0
 	collision = {}
 end
 
 function love.update(dt)
 	speed = 150 * dt
-	if love.keyboard.isDown("up") 	 then player.y = player.y - speed end
+	if love.keyboard.isDown("up")    then player.y = player.y - speed end
 	if love.keyboard.isDown("down")  then player.y = player.y + speed end
 	if love.keyboard.isDown("left")  then player.x = player.x - speed end
 	if love.keyboard.isDown("right") then player.x = player.x + speed end
-    --Solving all collisions between 'player' and 'tile', and checking the collision entries
+	--Solving all collisions between 'player' and 'tile', and checking the collision entries
 	collision = player:solveCollision(tile)
 end
 
 function love.draw()
 	love.graphics.rectangle('fill', player.x, player.y, player.w, player.h)
 	love.graphics.rectangle('line', tile.x, tile.y, tile.s, tile.s)
-	-- When a collision occur, a entry below will be true
+	-- When a collision occur, an entry below will be true
 	love.graphics.print("Top collision: "..tostring(collision.top), 0, 0)
 	love.graphics.print("Bottom collision: "..tostring(collision.bottom), 0, 20)
 	love.graphics.print("Left collision: "..tostring(collision.left), 0, 40)
